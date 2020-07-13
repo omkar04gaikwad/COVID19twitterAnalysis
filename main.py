@@ -22,43 +22,6 @@ def load_data():
     return data
 
 data = load_data()
-
-st.sidebar.subheader("Show random tweet")
-random_tweet = st.sidebar.radio('Twitter Sentiment', ('positive', 'neutral', 'negative'))
-st.sidebar.markdown(data.query('sentiment == @random_tweet')[["clean_tweet"]].sample(n=1).iat[0,0])
-
-st.sidebar.markdown("### Number of tweets by sentiment")
-select = st.sidebar.selectbox('Visualization type', ['Histogram', 'Pie chart'], key='1')
-sentiment_count = data['sentiment'].value_counts()
-sentiment_count = pd.DataFrame({'Sentiment':sentiment_count.index, 'Tweets':sentiment_count.values})
-
-if not st.sidebar.checkbox("Hide", True):
-    st.markdown("### Number of tweets by sentiment")
-    if select == "Histogram":
-        fig = px.bar(sentiment_count,x='Sentiment', y='Tweets', color='Tweets', height=500)
-        st.plotly_chart(fig)
-    else:
-        fig = px.pie(sentiment_count, values='Tweets', names='Sentiment')
-        st.plotly_chart(fig)
-
-
-st.sidebar.header("Word Cloud")
-word_sentiment = st.sidebar.radio('Display word cloud for what sentiment?', ('positive', 'neutral', 'negative'))
-
-if not st.sidebar.checkbox("Close", True, key='3'):
-    st.header('Word cloud for %s sentiment' % (word_sentiment))
-    df = data[data['sentiment']==word_sentiment]
-    words = ' '.join(df['clean_tweet'])
-    processed_words = ' '.join([word for word in words.split() if 'http' not in word and not word.startswith('@') and word != 'RT'])
-    wordcloud = WordCloud(stopwords=STOPWORDS, background_color='white', height=640, width=800).generate(processed_words)
-    plt.imshow(wordcloud)
-    plt.xticks([])
-    plt.yticks([])
-    st.pyplot()
-
-
-# To analyse your tweet
-
 def main():
 
         if st.subheader("Analyse Your Tweet!"):
@@ -71,3 +34,28 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+st.sidebar.subheader("Example of tweets")
+random_tweet = st.sidebar.radio('Choose Twitter Sentiment', ('positive', 'neutral', 'negative'))
+st.sidebar.markdown(data.query('sentiment == @random_tweet')[["clean_tweet"]].sample(n=1).iat[0,0])
+
+st.sidebar.markdown("### Number of tweets by sentiment")
+sentiment_count = data['sentiment'].value_counts()
+sentiment_count = pd.DataFrame({'Sentiment':sentiment_count.index, 'Tweets':sentiment_count.values})
+st.markdown("### Number of tweets by sentiment")
+fig = px.bar(sentiment_count,x='Sentiment', y='Tweets', color='Tweets', height=600)
+st.plotly_chart(fig)
+    
+
+
+st.sidebar.header("Word Cloud")
+word_sentiment = st.sidebar.radio('Display word cloud for what sentiment?', ('positive', 'neutral', 'negative'))
+st.header('Word cloud for %s sentiment' % (word_sentiment))
+df = data[data['sentiment']==word_sentiment]
+words = ' '.join(df['clean_tweet'])
+processed_words = ' '.join([word for word in words.split() if 'http' not in word and not word.startswith('@') and word != 'RT'])
+wordcloud = WordCloud(stopwords=STOPWORDS, background_color='white', height=640, width=800).generate(processed_words)
+plt.imshow(wordcloud)
+plt.xticks([])
+plt.yticks([])
+st.pyplot()
